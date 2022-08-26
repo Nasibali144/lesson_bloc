@@ -8,32 +8,44 @@ class CounterOnePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var bloc = BlocProvider.of<CounterCubit>(context);
+    // var bloc = BlocProvider.of<CounterCubit>(context);
+    var bloc = context.read<CounterBloc>();
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Cubit Counter"),
+        title: const Text("Cubit Counter"),
       ),
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-              onPressed: bloc.decrement,
-              icon: const Icon(CupertinoIcons.minus, size: 30,),
-            ),
+        child: BlocListener<CounterBloc, int>(
+          listener: (context, state) {
+            if(state == 0) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("State: $state")));
+            }
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                onPressed: () => bloc.add(CounterDecrementPressed()),
+                icon: const Icon(CupertinoIcons.minus, size: 30,),
+              ),
 
-            BlocBuilder<CounterCubit, int>(
-              builder: (context, state) {
-                return Text(state.toString(), style: const TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),);
-              }
-            ),
+              BlocBuilder<CounterBloc, int>(
+                bloc: bloc,
+                buildWhen: (oldState, newState) {
+                  return true;
+                },
+                builder: (context, state) {
+                  return Text(state.toString(), style: const TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),);
+                }
+              ),
 
-            IconButton(
-              onPressed: bloc.increment,
-              icon: const Icon(CupertinoIcons.plus, size: 30,),
-            )
-          ],
+              IconButton(
+                onPressed: () => bloc.add(CounterIncrementPressed()),
+                icon: const Icon(CupertinoIcons.plus, size: 30,),
+              )
+            ],
+          ),
         ),
       ),
     );
